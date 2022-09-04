@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+     name: 1test11
+     labels:
+        app: appsa-vi0
+spec:
+  replicas: 3
+  selector:
+      matchLabels:
+          app: appsa-vi0
+  template:
+      metadata:
+          labels:
+               app: appsa-vi0
+      spec:
+               containers:
+                - name: 11test11
+                  image: tomcat:latest
+                  ports:
+                    - containerPort: 8080
+                    
+                    
+                    
+apiVersion: v1
+kind: Service
+metadata:
+  name: maven-apptest
+  namespace: default
+spec:
+  selector:
+    app: appsa-vi0
+  type: LoadBalancer
+  ports:
+  - name: http
+    targetPort: 8080
+    port: 80
