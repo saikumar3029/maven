@@ -16,7 +16,7 @@ spec:
       spec:
                containers:
                 - name: 11test11
-                  image: tomcat:latest
+                  image: saikumarpanda28/testday1:latest
                   ports:
                     - containerPort: 8080
                     
