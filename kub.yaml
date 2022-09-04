@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-     name: 1test11111
+     name: 1test11
      labels:
-        app: appsa-vi01
+        app: appsa-vi0
 spec:
-  replicas: 3
+  replicas: 4
   selector:
       matchLabels:
-          app: appsa-vi01
+          app: appsa-vi0
   template:
       metadata:
           labels:
-               app: appsa-vi01
+               app: appsa-vi0
       spec:
                containers:
-                - name: 11test1111
+                - name: 11test11
                   image: saikumarpanda28/testday1:latest
                   ports:
                     - containerPort: 8080
@@ -29,7 +29,7 @@ metadata:
   namespace: default
 spec:
   selector:
-    app: appsa-vi01
+    app: appsa-vi0
   type: LoadBalancer
   ports:
   - name: http
