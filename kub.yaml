@@ -14,11 +14,11 @@ spec:
           labels:
                app: appsa-vi01
       spec:
-               containers:
-                - name: 1test1111
-                  image: saikumarpanda28/testday1:latest
-                  ports:
-                    - containerPort: 8080
+        containers:
+        - name: 1test1111
+          image: saikumarpanda28/testday1:434
+          ports:
+          - containerPort: 8080
                     
                     
                     
