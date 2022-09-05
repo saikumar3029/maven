@@ -34,4 +34,4 @@ spec:
   ports:
   - name: http
     port: 8080
-    nodePort: 32001
+    nodePort: 32004
