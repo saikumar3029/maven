@@ -16,7 +16,7 @@ spec:
       spec:
         containers:
         - name: 1test1111
-          image: saikumarpanda28/testday1:latest
+          image: saikumarpanda28/javaproject:latest
           ports:
           - containerPort: 8080
                     
