@@ -1,25 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-     name: 1test1111
-     labels:
-        app: appsa-vi01
+  name: somtest
+  labels:
+    app: app-v1
 spec:
-  replicas: 4
+  replicas: 2
   selector:
-      matchLabels:
-          app: appsa-vi01
+    matchLabels:
+      app: app-v1
   template:
-      metadata:
-          labels:
-               app: appsa-vi01
-      spec:
-        containers:
-        - name: 1test1111
-          image: saikumarpanda28/javaproject:latest
-          ports:
-          - containerPort: 8080
-                    
+    metadata:
+      labels:
+        app: app-v1
+    spec:
+      containers:
+      - name: saomtest
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: mountpathandhost
+          mountPath: /usr/nginx
+      volumes:
+      - name: mountpathandhost
+        hostPath:
+          path: /opt
+      imagePullSecrets:
+      - name: saisai
+      nodeSelector:
+        name: node1
+
 ---                    
                     
 apiVersion: v1
