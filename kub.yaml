@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: some1name
+  labels:
+    app: my1api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mya1pi
+  template:
+    metadata:
+      labels:
+        app: mya1pi
+    spec:
+      containers:
+      - name: m1yapispec
+        ports:
+        - containerPort: 8080
+        image: saikumarpanda28/testday1:latest
+        resources:
+          requests:
+            cpu: "2m"
+            memory: "2Mi"
+          limits:
+            cpu: "4m"
+            memory: "4Mi"
+        volumeMounts:
+        - name: mountandhost
+          mountPath: /usr/local
+      volumes:
+      - name: mountandhost
+        hostPath:
+          path: /mytest/
+      imagePullSecrets:
+      - name: saisaisai1
+      nodeSelector:
+        name: node1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: servic1e
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    nodePort: 30210
+  type: NodePort
+  selector:
+    app: my1api
