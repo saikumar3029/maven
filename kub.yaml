@@ -34,7 +34,7 @@ spec:
         hostPath:
           path: /mytest/
       imagePullSecrets:
-      - name: saisaisai1
+      - name: saitest2
       nodeSelector:
         name: node1
 ---
