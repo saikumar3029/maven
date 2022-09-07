@@ -28,7 +28,7 @@ spec:
             memory: "4Mi"
         volumeMounts:
         - name: mountandhost
-          mountPath: /usr/local
+          mountPath: /usr/local/tomcat/webapps
       volumes:
       - name: mountandhost
         hostPath:
