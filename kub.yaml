@@ -1,33 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: somtest
+  name: somename
   labels:
-    app: app-v1
+    app: myapi
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: app-v1
+      app: myapi
   template:
     metadata:
       labels:
-        app: app-v1
+        app: myapi
     spec:
       containers:
-      - name: saomtest
-        image: nginx:latest
+      - name: myapispec
         ports:
         - containerPort: 80
+        image: nginx:latest
+        resources:
+          requests:
+            cpu: "2m"
+            memory: "2Mi"
+          limits:
+            cpu: "4m"
+            memory: "4Mi"
         volumeMounts:
-        - name: mountpathandhost
-          mountPath: /usr/nginx
+        - name: mountandhost
+          mountPath: /usr/local
       volumes:
-      - name: mountpathandhost
+      - name: mountandhost
         hostPath:
-          path: /opt
+          path: /mytest/
       imagePullSecrets:
-      - name: saisai
+      - name: saisaisai
       nodeSelector:
         name: node1
 
