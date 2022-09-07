@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: some1name
   labels:
-    app: my1api
+    app: mya1pi
 spec:
   replicas: 2
   selector:
@@ -49,4 +49,4 @@ spec:
     nodePort: 30210
   type: NodePort
   selector:
-    app: my1api
+    app: mya1pi
