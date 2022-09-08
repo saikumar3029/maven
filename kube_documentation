@@ -1,0 +1,361 @@
+# ref url: https://phoenixnap.com/kb/install-kubernetes-on-ubuntu
+
+For writing kubernetes yaml file please follow indentation (2 spaces)
+do all steps on both machines)
+
+Take 2 vms (1 for master another for node )
+
+vi /etc/hosts
+add two ip of both cluster and node if dns exist add that too.
+
+change server name :(do it on both machines)
+# hostnamectl set-hostname master 
+
+Set enforce is 0
+#set enforce 0
+
+update the server
+
+# sudo apt-get update
+
+install docker 
+ # sudo apt-get install docker.io
+ to check docker version 
+ # docker ––version
+ 
+ docker start and status 
+  
+#sudo systemctl enable docker
+#sudo systemctl status docker
+#sudo systemctl start docker
+
+
+Install Kubernetes
+		Add Kubernetes Signing Key (Since you are downloading Kubernetes from a non-standard repository, it is essential to ensure that the software is authentic. This is done by adding a signing key.)
+		# curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+		
+		Add Software repository
+		# sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+		Kuberntes installation 
+		# sudo apt-get install kubeadm kubelet kubectl
+ to check verion of kubeadm 
+# kubeadm version
+ 
+** only on master
+kubeadm init 
+# sudo kubeadm init ---apiserver-advertise-address=masterip --pod-network-cidr=10.244.0.0/16
+(if any errors add pre flight erros)
+
+we will get kubeadm join command with token 
+and also we have to create a directory - we can get this after kubeadm init
+# kubernetes-master:~$ mkdir -p $HOME/.kube
+#kubernetes-master:~$ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+#kubernetes-master:~$ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+Deploy Pod Network to Cluster(once this done we need to install network plugin to communicate between nodes)
+
+# sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+Verify that everything is running and communicating:
+# kubectl get pods --all-namespaces
+
+
+# kubectl get nodes
+# kubectl get pods
+# kubectl describe pods ( to check the pods deatils on which node it is running)
+
+
+
+Saample file for  pod
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+        name: test
+        labels:
+                apps: apps-v1
+spec:
+        containers:
+                - name: somenamss
+                  image: nginx:1.14.2
+                  ports:
+                  - containerPort: 80
+
+
+sample deployment object 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+     name: 1test11
+     labels:
+        app: appsa-vi0
+spec:
+  replicas: 3
+  selector:
+      matchLabels:
+          app: appsa-vi0
+  template:
+      metadata:
+          labels:
+               app: appsa-vi0
+      spec:
+               containers:
+                - name: 11test11
+                  image: tomcat:latest
+                  ports:
+                    - containerPort: 8080
+					
+					
+
+
+
+kube lables
+
+https://www.youtube.com/watch?v=floATZII2YU
+
+label a node or master using below command 
+# kubectl label node kubmaster name=master1
+explanation kubectl label node workernode or master node (while creating we have changed the name using hostnamectl set-hostanme sai)
+
+
+after doing this check the name that we applied using below cmd
+
+#kubectl get nodes --show-labels
+
+
+now writing yaml file with which node the app to run using labels
+eg : 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+     name: 1test11
+     labels:
+        app: appsa-vi0
+spec:
+  replicas: 3
+  selector:
+      matchLabels:
+          app: appsa-vi0
+  template:
+      metadata:
+          labels:
+               app: appsa-vi0
+      spec:
+               containers:
+                - name: 11test11
+                  image: tomcat:latest
+                  ports:
+                    - containerPort: 8080
+				nodeSelector:
+					name: node1
+					
+with nodeSelector we can run the pod or deployment on specific node 
+
+
+with nodeSelector we can run the pod or deployment on specific node 
+
+
+
+Ho wto delete a service 
+# kubectl delete service servicename
+how to delete a deployment
+# kubectl delete deployment deploymentname
+how to delete a pod
+#kubectl delete pod podname
+
+
+
+for clonig private docker repository add the docker username and pssword
+# kubectl create secret docker-registry mydockersaicredanynameyoucan --docker-username=saikumarpanda28 --docker-password=P@ssw0rd@2930 --docker-email=kumar93933sai@gmail.com -n <your-namespace>
+and in yaml add the value file 
+
+spec:
+  containers:
+  - name: private-reg-container-name
+    image: saikumarpanda28/testday1:latest
+  imagePullSecrets:
+  - name: mydockersaicredanynameyoucan
+  
+  
+  volume adding in dockerfile 
+  
+yaml file example
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: registry.k8s.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-pd
+      name: test-volume
+  volumes:
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /data
+      # this field is optional
+      type: Directory
+
+
+
+
+Using resources and nodeselector volumesmounts using host path
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: somename
+  labels:
+    app: myapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapi
+  template:
+    metadata:
+      labels:
+        app: myapi
+    spec:
+      containers:
+      - name: myapispec
+        ports:
+        - containerPort: 80
+        image: nginx:latest
+        resources:
+          requests:
+            cpu: "2m"
+            memory: "2Mi"
+          limits:
+            cpu: "4m"
+            memory: "4Mi"
+        volumeMounts:
+        - name: mountandhost
+          mountPath: /usr/local
+      volumes:
+      - name: mountandhost
+        hostPath:
+          path: /mytest/
+      imagePullSecrets:
+      - name: saisaisai
+      nodeSelector:
+        name: node1
+
+using rolling update strategy in yaml file and alos maintaing multiple conatiners in yaml file
+https://www.youtube.com/watch?v=xRifmrap7S8
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 0809test
+  labels:
+    app: app-0809test
+spec:
+  replicas: 6
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: app-0809test
+  template:
+    metadata:
+      labels:
+        app: app-0809test
+    spec:
+      containers:
+      - name: cont-0809test
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: 0809testvolume
+          mountPath: /usr/local/tomcat/webapps
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "100m"
+            memory: "100Mi"
+      - name: cont2-0809
+        image: tomcat
+        ports:
+        - containerPort: 8080
+      volumes:
+      - name: 0809testvolume
+        hostPath:
+          path: /mytest/
+      imagePullSecrets:
+      - name: saitest2
+      nodeSelector:
+        name: node1
+
+
+rollout commands
+
+#kubectl rollout hitsory deployment deploymentname
+#kubectl rollout status deployment deploymentname
+#kubectl rollout undo deployment deploymentname
+# kubectl apply -f . --record=true
+ to record the rollout records use the above cmd 
+
+
+Service file with taret port usage : 
+
+Link for video 
+https://www.youtube.com/watch?v=T4Z7visMM4E
+
+while create deployment file we write container port the default is 80 and we can write required port, now to access from globally we use LB or Node port to service( we have to write service file)
+service file
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc0809
+  labels:
+    app: app-0809test
+spec:
+  ports:
+  - port: 143     -----------------> this is service port this can be your choice, its not a mandatory to write same port that we have written in deployment yaml file(in container port)  
+    protocol: TCP
+    nodePort: 32001
+    targetPort: 8080 ------> Targetport is we have two containers running inside a pod(two containers inside pod file is below) with different ports, we need to target to a single port eg: pod has 2 container 1 runs with 300 and another with 400 i need to target any one port using svc file, with targetPort we can fulfill this
+  selector:
+    app: app-0809test
+  type: NodePort
+
+
+
+
+
+
+
+
+
+TroubleShoot:
+
+
+1) image pull failed in kubernetes pods while after creating deployment 
+
+add imagepullsecrets in yaml file and also add kubect create secret docker-registry saomname --docker-username=sai --docker-password=test
+2) CrashLoopBackOff while runningpods in deployment
+
+Insufficient resources—lack of resources prevents the container from loading---- resource that we have provided
+Locked file—a file was already locked by another container
+Locked database—the database is being used and locked by other pods
+Failed reference—reference to scripts or binaries that are not present on the container
+Setup error—an issue with the init-container setup in Kubernetes
+Config loading error—a server cannot load the configuration file
+Misconfigurations—a general file system misconfiguration
+Connection issues—DNS or kube-DNS is not able to connect to a third-party service
+Deploying failed services—an attempt to deploy services/applications that have already failed (e.g. due to a lack of access to other services)
