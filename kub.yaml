@@ -18,7 +18,7 @@ spec:
       - name: m1yapispec
         ports:
         - containerPort: 8080
-        image: saikumarpanda28/testday1:latest
+        image: saikumarpanda28/testday1:0809
         resources:
           requests:
             cpu: "2m"
