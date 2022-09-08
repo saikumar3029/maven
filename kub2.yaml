@@ -1,55 +1,67 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: somename
+  name: 0809test
   labels:
-    app: myapi
+    app: app-0809test
 spec:
-  replicas: 2
+  replicas: 6
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
   selector:
     matchLabels:
-      app: myapi
+      app: app-0809test
   template:
     metadata:
       labels:
-        app: myapi
+        app: app-0809test
     spec:
       containers:
-      - name: myapispec
+      - name: cont-0809test
+        image: nginx
         ports:
         - containerPort: 80
-        image: nginx:latest
+        volumeMounts:
+        - name: 0809testvolume
+          mountPath: /usr/local/tomcat/webapps
         resources:
           requests:
-            cpu: "2m"
-            memory: "2Mi"
+            cpu: "50m"
+            memory: "50Mi"
           limits:
-            cpu: "4m"
-            memory: "4Mi"
-        volumeMounts:
-        - name: mountandhost
-          mountPath: /usr/local
+            cpu: "100m"
+            memory: "100Mi"
+      - name: cont2-0809
+        image: tomcat
+        ports:
+        - containerPort: 8080
       volumes:
-      - name: mountandhost
+      - name: 0809testvolume
         hostPath:
           path: /mytest/
       imagePullSecrets:
-      - name: saisaisai
+      - name: saitest2
       nodeSelector:
         name: node1
 
----                    
-                    
+
+---
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: maven-apptest
-  namespace: default
+  name: svc0809
+  labels:
+    app: app-0809test
 spec:
-  selector:
-    app: appsa-vi01
-  type: NodePort
   ports:
-  - name: http
-    port: 8080
-    nodePort: 32004
+  - port: 8090
+    targetPort: 8080
+    protocol: TCP
+    nodePort: 32001
+  selector:
+    app: app-0809test
+  type: NodePort
