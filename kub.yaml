@@ -54,8 +54,9 @@ spec:
   ports:
   - port: 80
     protocol: TCP
-    nodePort: 32040
-    targetPort: 80
+    nodePort: 32001
+    targetPort: 8080
   selector:
     app: app-0809test
   type: NodePort
+
