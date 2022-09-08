@@ -1,0 +1,89 @@
+pipeline{
+    agent any
+    //agent none
+    //agent {label "soamsas"}
+    //tools{ 
+        //maven "m3"
+    //}
+    environment{
+        env1="hi this is printed messgae"
+    }
+    stages{
+        stage("clone"){
+            steps{
+                git branch:"master", url:"https://github.com/SaiKumarPanda28/maven.git"
+            }
+        }
+        stage('mvn clean '){
+            steps{
+                script{
+                    sh "mvn clean install "
+                }
+            }
+        }
+        stage("pack"){
+            steps{
+                sh "mvn package"
+            }
+        }
+       
+        stage("run for test"){
+            steps{
+             script{  try{ sh "docker system prune --all"
+            }catch(error){
+                sh "docker system prune --all -f"
+            }
+             }
+             
+            }
+        }
+         stage('dockerbuild'){
+            //agent {label "dockeragent"}
+            steps{
+                sh "docker build -t saikumarpanda28/testday1:latest ."
+            }
+        }
+       
+        
+        stage('envtest'){
+            steps{
+                sh "echo ${env1}"
+            }
+        }
+        stage("push to docker hub"){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+                        sh "docker login -u saikumarpanda28 -p ${dockerhubpwd}"
+                    }
+                }
+                sh "docker push saikumarpanda28/testday1:latest"
+            }
+        }
+        stage('kue'){
+            steps{
+                sshagent(['asdadsa']) {
+    sh "scp -o StrictHostKeyChecking=no kub.yaml ubuntu@3.110.60.106:/home/ubuntu"
+    script{
+       try{ sh "ssh ubuntu@3.110.60.106 sudo kubectl create -f ."
+       }catch(error){sh "ssh ubuntu@3.110.60.106 sudo kubectl apply -f ."
+           
+       }
+    }
+}
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    }
+}
