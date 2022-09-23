@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 0809test
+  labels:
+    app: app-0809test
+spec:
+  replicas: 6
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: app-0809test
+  template:
+    metadata:
+      labels:
+        app: app-0809test
+    spec:
+      containers:
+      - name: cont-0809test
+        image: nginx
+        ports:
+        - containerPort: 80
+       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc0809
+  labels:
+    app: app-0809test
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: app-0809test
+  type: LoadBalancer
