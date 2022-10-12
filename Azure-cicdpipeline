@@ -1,0 +1,120 @@
+trigger:
+- master
+pool:  
+  name: selfhostedpools
+
+steps:
+- task: Maven@3
+  displayName: 'maven build with pom.xml'
+  inputs:
+    goals: 'clean install compile package'
+    mavenPomFile: 'pom.xml'
+    publishJUnitResults: false
+- task: CopyFiles@2
+  displayName: 'From SourceFolder to Destin'
+  inputs:
+    sourceFolder: '$(system.defaultworkingdirectory)'
+    Contents:  '**/target/*.jar'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    OverWrite: true
+    CleanTargetFolder: true
+    
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'Free Trial (cd0a5d60-bf57-4ce0-aac2-8c5301ebc7b7)'
+    appType: 'webAppLinux'
+    appName: 'app1code'
+    package: '$(System.DefaultWorkingDirectory)/target/*.jar'
+    runtimeStack: 'JAVA|8-jre8'
+
+- task: Docker@2
+  displayName: 'dockerbuildandpush'
+  inputs:
+    containerRegistry: 'dockerconnection'
+    repository: '2309day'
+    Dockerfile: dockerfile
+    tags: $(BUILD.BUILDID) 
+    command: buildAndPush
+
+
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy Azure App Service'
+  inputs:
+    ConnectionType: AzureRM
+    azureSubscription: 'Free Trial (cd0a5d60-bf57-4ce0-aac2-8c5301ebc7b7)'
+    appType: webAppContainer
+    WebAppName: asdadadadadadadada
+    DockerNamespace: sairegis.azurecr.io
+    DockerRepository: 2309day
+    DockerImageTag: $(BUILD.BUILDID)
+
+- task: Kubernetes@0
+  displayName: 'kubectl create'
+  inputs:
+    kubernetesServiceConnection: Kuberntestconnectionbysrc1
+    command: apply
+    useConfigurationFile: true
+    configuration: 'Azure_kube.yaml'
+    versionSpec: 1.13.2
+
+#####################
+trigger:
+- master
+pool:
+  name: selfhostedpools
+
+
+jobs:
+  - job: job1Build
+    displayName: buildjoibinstage1
+    steps:
+    - task: Maven@3
+      displayName: mavenbuild
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'clean install compile package'
+        publishJUnitResults: false
+    - task: CopyFiles@2
+      displayName: copyfile
+      inputs:
+        SourceFolder: '$(system.defaultworkingdirectory)'
+        Contents: '**/target/*.jar'
+        OverWrite: true
+        CleanTargetFolder: true
+        TargetFolder: '$(build.artifactstagingdirectory)'
+  - job: pushtowebapp
+    displayName: pushtoazurewebapps
+    steps:
+    - task: AzureWebApp@1
+      displayName: pushtoazurewebapp
+      inputs: 
+        azureSubscription: 'Free Trial (cd0a5d60-bf57-4ce0-aac2-8c5301ebc7b7)'
+        appType: webAppLinux
+        appName: saicodewebapp
+        package: '**/target/*.jar'  
+        runtimeStack: 'JAVA|8-jre8'   
+  - job: dockerbuild
+    displayName: dockerpushcommand
+    steps:
+    - task: Docker@2
+      displayName: dockerbuild
+      inputs:
+        command: buildAndPush
+        dockerfile: dockerfile
+        containerRegistry: dockerconnection
+        repository: inventraxproject
+        tags: '$(build.buildid)'
+  - job: deployjobtocontainer
+    displayName: deployjobtocontainer
+    steps:
+    - task: AzureRmWebAppDeployment@4
+      displayName: publishtowebappcontainerusingrm
+      inputs:
+       ConnectionType: AzureRM
+       azureSubscription: 'Free Trial (cd0a5d60-bf57-4ce0-aac2-8c5301ebc7b7)'
+       appType: webAppContainer
+       WebAppName: saicontainerwebapp
+       DockerNamespace: sairegis.azurecr.io
+       DockerRepository: inventraxproject
+       DockerImageTag: '$(build.buildid)'
