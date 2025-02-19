@@ -5,7 +5,7 @@ expose 8081
 # Expose the application port
 RUN mkdir manikanta1802
 workdir /app
-copy . .
+copy target/my-app-1.0-SNAPSHOT.jar .
 CMD ["java", "-jar", "/app/my-app-1.0-SNAPSHOT.jar"]
 
 
